@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {FontLoader} from 'three/examples/jsm/loaders/FontLoader';
 import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry';
+import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -14,29 +15,48 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
+camera.position.setY(5);
 
 renderer.render(scene, camera);
 
-// const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-// const material = new THREE.MeshBasicMaterial({color: 0xff6347, wireframe: true});
-// const torus = new THREE.Mesh(geometry, material);
-
-// scene.add(torus);
-
 const fontLoader = new FontLoader();
-fontLoader.load('node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json',
-  (droidFont) => {
+fontLoader.load('fonts/Arial_Regular.json',
+  (arialFont) => {
       const textGeometry = new TextGeometry('Yukio was an impostor', {
-        height: 2, 
+        height: 0.3, 
         size: 2, 
-        font: droidFont,
+        font: arialFont,
       });
-      const textMaterial = new THREE.MeshNormalMaterial();
+      const textMaterial = new THREE.MeshBasicMaterial();
       const textMesh = new THREE.Mesh(textGeometry, textMaterial);
       textMesh.position.setX(-15);
       textMesh.position.setY(5);
       scene.add(textMesh);
   });
+
+const fbxLoader = new FBXLoader();
+fbxLoader.setPath('/models/among-us-character-fbx/');
+fbxLoader.load('/source/1.fbx', (fbx) => {
+  fbx.rotateY(3.14);
+  fbx.scale.setScalar(0.05);
+  fbx.traverse(trav => {
+    const textureLoader = new THREE.TextureLoader();
+    
+    const albedo = textureLoader.load('textures/DefaultMaterial_albedo');
+    const metallic = textureLoader.load('textures/DefaultMaterial_metallic');
+    const normal = textureLoader.load('textures/DefaultMaterial_normal');
+    const roughness = textureLoader.load('textures/DefaultMaterial_roughness');
+    console.error('before assignment')
+    trav.material.albedo = albedo;
+    trav.material.metallic = metallic;
+    trav.material.normal = normal;
+    trav.material.roughness = roughness;
+    trav.material.needsUpdate = true;
+    console.error('after assigning')    
+  });
+
+  scene.add(fbx);
+})
 
 //To run code below change the Mesh of material from Basic to Standart
 const pointLight = new THREE.PointLight(0xffffff)
@@ -45,17 +65,10 @@ pointLight.position.set(5,5,5)
 
 scene.add(pointLight, ambientLight)
 
-const gridHelper = new THREE.GridHelper(200, 100);
-scene.add(gridHelper);
-
 const controls = new OrbitControls(camera, renderer.domElement);
 
 function animate(){
   requestAnimationFrame(animate);
-
-  // torus.rotation.x += 0.01;
-  // torus.rotation.y += 0.005;
-  // torus.rotation.z += 0.01;
 
   controls.update();
 
