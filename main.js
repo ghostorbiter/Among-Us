@@ -33,32 +33,34 @@ fontLoader.load('fonts/Arial_Regular.json',
       textMesh.position.setY(5);
       scene.add(textMesh);
   });
-
+  
+let amongus; 
 const fbxLoader = new FBXLoader();
 fbxLoader.setPath('/models/among-us-character-fbx/');
 fbxLoader.load('/source/1.fbx', (fbx) => {
-  fbx.rotateY(3.14);
+  fbx.rotateY(Math.PI);
+  fbx.position.set(-100,0,0);
   fbx.scale.setScalar(0.05);
+
   fbx.traverse(trav => {
-    const textureLoader = new THREE.TextureLoader();
-    
-    const albedo = textureLoader.load('textures/DefaultMaterial_albedo');
-    const metallic = textureLoader.load('textures/DefaultMaterial_metallic');
-    const normal = textureLoader.load('textures/DefaultMaterial_normal');
-    const roughness = textureLoader.load('textures/DefaultMaterial_roughness');
-    console.error('before assignment')
-    trav.material.albedo = albedo;
-    trav.material.metallic = metallic;
-    trav.material.normal = normal;
-    trav.material.roughness = roughness;
-    trav.material.needsUpdate = true;
-    console.error('after assigning')    
+    if (trav.isMesh){
+      const textureLoader = new THREE.TextureLoader();  
+      let material = new THREE.MeshNormalMaterial();  
+
+      material.albedo = textureLoader.load('textures/DefaultMaterial_albedo');
+      material.metallic = textureLoader.load('textures/DefaultMaterial_metallic');
+      material.normal = textureLoader.load('textures/DefaultMaterial_normal');
+      material.roughness = textureLoader.load('textures/DefaultMaterial_roughness');
+
+      trav.material = material;
+      trav.material.needsUpdate = true;
+    }
   });
 
+  amongus = fbx;
   scene.add(fbx);
 })
 
-//To run code below change the Mesh of material from Basic to Standart
 const pointLight = new THREE.PointLight(0xffffff)
 const ambientLight = new THREE.AmbientLight(0xffffff)
 pointLight.position.set(5,5,5)
@@ -66,15 +68,6 @@ pointLight.position.set(5,5,5)
 scene.add(pointLight, ambientLight)
 
 const controls = new OrbitControls(camera, renderer.domElement);
-
-function animate(){
-  requestAnimationFrame(animate);
-
-  controls.update();
-
-  renderer.render(scene, camera);
-}
-animate()
 
 function AddStar(){
   const geometry = new THREE.SphereGeometry(0.25, 24, 24);
@@ -86,5 +79,22 @@ function AddStar(){
   star.position.set(x,y,z);
   scene.add(star);
 }
-
 Array(200).fill().forEach(AddStar);
+
+function animate(){
+  requestAnimationFrame(animate);
+
+  controls.update();
+  
+  amongus.rotation.x += 0.01;
+  amongus.rotation.z += 0.01;
+
+  if (amongus.position.x <= 100){
+    amongus.position.x += 0.1;
+  }else {
+    amongus.position.x = -100;
+  }
+
+  renderer.render(scene, camera);
+}
+animate()
