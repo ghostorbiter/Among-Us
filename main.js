@@ -33,7 +33,24 @@ fontLoader.load('fonts/Arial_Regular.json',
   });
 
 let amongus;
-// TODO: replace with amongus.glb lol
+const loader = new GLTFLoader()
+  .setPath('./models/')
+loader.load('amongus.glb',
+  function onLoad(parsedJSON) {
+    amongus = parsedJSON.scene;
+    amongus.scale.divideScalar(25);
+    amongus.position.y = 5;
+    amongus.traverse(descendantObject => {
+      descendantObject.castShadow = true;
+    });
+    scene.add(amongus);
+  },
+  undefined, // onProgress
+  function onFail(error) {
+    var message = (error && error.message) ? error.message : 'Failed to load glTF model';
+    console.warn(message);
+  }
+);
 
 const pointLight = new THREE.PointLight(0xFFFFFF)
 const ambientLight = new THREE.AmbientLight(0xFFFFFF)
