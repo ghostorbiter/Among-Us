@@ -40,6 +40,7 @@ loader.load('amongus.glb',
     amongus = parsedJSON.scene;
     amongus.scale.divideScalar(25);
     amongus.position.y = 5;
+    amongus.position.x = -50;
     amongus.traverse(descendantObject => {
       descendantObject.castShadow = true;
     });
@@ -91,7 +92,7 @@ function animate() {
     if (amongus.position.x <= 100) {
       amongus.position.x += 0.1;
     } else {
-      amongus.position.x = -100;
+      amongus.position.x = -50;
     }
   }
 
